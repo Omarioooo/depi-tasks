@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb-set
+spec:
+  serviceName: mariadb-srv
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mariadb
+          image: mariadb:lts-ubi10
+          ports:
+            - name: db
+              containerPort: 3306
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: root-password
+          volumeMounts:
+            - name: mariadb-pvct
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mariadb-pvct
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: my-storage-class
+        resources:
+          requests:
+            storage: 100Mi
