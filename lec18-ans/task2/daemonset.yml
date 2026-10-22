@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prometheus-daemonset
+  labels:
+    app: prometheus-logging
+spec:
+  selector:
+    matchLabels:
+      name: prometheus-pod-ds
+  template:
+    metadata:
+      labels:
+        name: prometheus-pod-ds
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:main-distroless
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
